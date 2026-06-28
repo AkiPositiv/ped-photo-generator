@@ -102,7 +102,32 @@
         <button id="btn-s2-next" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition" data-i18n="btn_next">Далее →</button>
       </div>
     </div>
-    <div id="step-3" class="step-panel hidden"><!-- filled in Task 8 --></div>
+    <div id="step-3" class="step-panel hidden">
+      <div class="card mb-6">
+        <h2 class="text-lg font-semibold text-gray-700 mb-4" data-i18n="photos_label">Фото учителя</h2>
+        <div id="photo-drop" class="drop-zone">
+          <div class="text-4xl mb-2">📷</div>
+          <p class="text-gray-500 text-sm" data-i18n="photos_drag">Перетащите фото или нажмите для выбора</p>
+          <input id="photo-input" type="file" accept="image/*" multiple class="hidden">
+        </div>
+        <div id="photo-thumbnails" class="mt-4 grid grid-cols-5 gap-2"></div>
+      </div>
+
+      <div class="card mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-700" data-i18n="prompt_label">Промпты</h2>
+          <button id="btn-shuffle" class="text-sm bg-indigo-50 text-indigo-700 border border-indigo-200 px-4 py-2 rounded-lg hover:bg-indigo-100 transition font-medium" data-i18n="btn_shuffle">🔀 Перемешать ракурсы</button>
+        </div>
+        <div id="prompt-cards"></div>
+      </div>
+
+      <div id="s3-error" class="hidden mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm"></div>
+
+      <div class="flex justify-between">
+        <button id="btn-s3-back" class="border border-gray-300 text-gray-600 font-medium px-8 py-3 rounded-xl hover:bg-gray-50 transition" data-i18n="btn_back">← Назад</button>
+        <button id="btn-s3-next" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition" data-i18n="btn_next">Далее →</button>
+      </div>
+    </div>
     <div id="step-4" class="step-panel hidden"><!-- filled in Task 9 --></div>
 
   </div>

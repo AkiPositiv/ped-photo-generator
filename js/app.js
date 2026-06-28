@@ -240,9 +240,107 @@ function renderStep2Items() {
   });
 }
 
-function renderStep3() {}
+function renderStep3() {
+  // Photo upload zone
+  const photoDropEl = document.getElementById('photo-drop');
+  const photoInput = document.getElementById('photo-input');
+  const thumbsEl = document.getElementById('photo-thumbnails');
 
-function renderStep3Prompts() {}
+  photoDropEl.addEventListener('click', () => photoInput.click());
+  photoDropEl.addEventListener('dragover', e => { e.preventDefault(); photoDropEl.classList.add('drag-over'); });
+  photoDropEl.addEventListener('dragleave', () => photoDropEl.classList.remove('drag-over'));
+  photoDropEl.addEventListener('drop', e => {
+    e.preventDefault(); photoDropEl.classList.remove('drag-over');
+    addPhotos(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
+  });
+  photoInput.addEventListener('change', () => {
+    addPhotos(Array.from(photoInput.files));
+    photoInput.value = '';
+  });
+
+  function addPhotos(files) {
+    const remaining = 10 - state.photoFiles.length;
+    state.photoFiles.push(...files.slice(0, remaining));
+    renderThumbs();
+  }
+
+  function renderThumbs() {
+    thumbsEl.innerHTML = '';
+    state.photoFiles.forEach((file, idx) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'relative';
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.className = 'w-full aspect-square object-cover rounded-lg border-2 border-gray-200';
+      const del = document.createElement('button');
+      del.className = 'absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center hover:bg-red-600';
+      del.textContent = '×';
+      del.onclick = () => { state.photoFiles.splice(idx, 1); renderThumbs(); };
+      wrapper.appendChild(img);
+      wrapper.appendChild(del);
+      thumbsEl.appendChild(wrapper);
+    });
+  }
+
+  // Initial angles + prompts
+  if (Object.keys(state.angles).length === 0) {
+    const keys = [...state.checkedItems];
+    state.angles = assignAngles(keys);
+    keys.forEach(key => { state.prompts[key] = buildPrompt(state.gender, key, state.angles[key]); });
+  }
+  renderStep3Prompts();
+
+  // Shuffle button
+  document.getElementById('btn-shuffle').onclick = () => {
+    const keys = [...state.checkedItems];
+    state.angles = assignAngles(keys);
+    keys.forEach(key => { state.prompts[key] = buildPrompt(state.gender, key, state.angles[key]); });
+    renderStep3Prompts();
+  };
+
+  // Navigation
+  document.getElementById('btn-s3-back').onclick = () => goToStep(2);
+  document.getElementById('btn-s3-next').onclick = () => {
+    if (state.photoFiles.length === 0) { showError('s3-error', 'err_no_photos'); return; }
+    renderStep4();
+    goToStep(4);
+  };
+}
+
+function renderStep3Prompts() {
+  const container = document.getElementById('prompt-cards');
+  if (!container) return;
+  container.innerHTML = '';
+  [...state.checkedItems].forEach(key => {
+    const angle = state.angles[key] || '';
+    const prompt = state.prompts[key] || '';
+    const card = document.createElement('div');
+    card.className = 'mb-4 p-4 border border-gray-200 rounded-xl bg-gray-50';
+    card.innerHTML = `
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-semibold text-gray-700">${t('item_' + key)}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">📐 ${angle}</span>
+          <button class="reroll-btn text-xs text-gray-400 hover:text-indigo-600 transition" data-key="${key}" title="Переназначить ракурс">↺</button>
+        </div>
+      </div>
+      <textarea class="prompt-ta w-full text-xs text-gray-600 border border-gray-200 rounded-lg p-2 resize-none bg-white focus:outline-none focus:ring-1 focus:ring-indigo-300" rows="3" data-key="${key}">${prompt}</textarea>
+    `;
+    card.querySelector('.reroll-btn').addEventListener('click', (e) => {
+      const k = e.target.dataset.key;
+      const newAngle = ANGLE_POOL[Math.floor(Math.random() * ANGLE_POOL.length)];
+      state.angles[k] = newAngle;
+      state.prompts[k] = buildPrompt(state.gender, k, newAngle);
+      renderStep3Prompts();
+    });
+    card.querySelector('.prompt-ta').addEventListener('input', e => {
+      state.prompts[e.target.dataset.key] = e.target.value;
+    });
+    container.appendChild(card);
+  });
+}
+
+function renderStep4() {}
 
 // ── Boot ────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
