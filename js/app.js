@@ -246,17 +246,17 @@ function renderStep3() {
   const photoInput = document.getElementById('photo-input');
   const thumbsEl = document.getElementById('photo-thumbnails');
 
-  photoDropEl.addEventListener('click', () => photoInput.click());
-  photoDropEl.addEventListener('dragover', e => { e.preventDefault(); photoDropEl.classList.add('drag-over'); });
-  photoDropEl.addEventListener('dragleave', () => photoDropEl.classList.remove('drag-over'));
-  photoDropEl.addEventListener('drop', e => {
+  photoDropEl.onclick = () => photoInput.click();
+  photoDropEl.ondragover = e => { e.preventDefault(); photoDropEl.classList.add('drag-over'); };
+  photoDropEl.ondragleave = () => photoDropEl.classList.remove('drag-over');
+  photoDropEl.ondrop = e => {
     e.preventDefault(); photoDropEl.classList.remove('drag-over');
     addPhotos(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
-  });
-  photoInput.addEventListener('change', () => {
+  };
+  photoInput.onchange = () => {
     addPhotos(Array.from(photoInput.files));
     photoInput.value = '';
-  });
+  };
 
   function addPhotos(files) {
     const remaining = 10 - state.photoFiles.length;
