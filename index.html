@@ -75,7 +75,33 @@
         <button id="btn-s1-next" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition" data-i18n="btn_next">Далее →</button>
       </div>
     </div>
-    <div id="step-2" class="step-panel hidden"><!-- filled in Task 7 --></div>
+    <div id="step-2" class="step-panel hidden">
+      <div class="card mb-6">
+        <h2 class="text-lg font-semibold text-gray-700 mb-4" id="s2-month-label">Выберите месяц</h2>
+        <div id="month-pills" class="flex flex-wrap gap-2"></div>
+      </div>
+
+      <div class="card mb-6">
+        <h2 class="text-lg font-semibold text-gray-700 mb-4" id="s2-mode-label">Режим</h2>
+        <div class="flex gap-3">
+          <button class="mode-btn flex-1 py-3 rounded-xl border-2 font-medium transition" data-val="plan" data-i18n="mode_plan">По плану</button>
+          <button class="mode-btn flex-1 py-3 rounded-xl border-2 font-medium transition" data-val="real" data-i18n="mode_real">По реализации</button>
+        </div>
+      </div>
+
+      <div class="card mb-6">
+        <h2 class="text-lg font-semibold text-gray-700 mb-4" data-i18n="items_title">Виды работ с часами</h2>
+        <div id="items-list"></div>
+        <div id="no-items-msg" class="hidden text-gray-400 text-sm text-center py-6" data-i18n="no_items">Нет данных</div>
+      </div>
+
+      <div id="s2-error" class="hidden mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm"></div>
+
+      <div class="flex justify-between">
+        <button id="btn-s2-back" class="border border-gray-300 text-gray-600 font-medium px-8 py-3 rounded-xl hover:bg-gray-50 transition" data-i18n="btn_back">← Назад</button>
+        <button id="btn-s2-next" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition" data-i18n="btn_next">Далее →</button>
+      </div>
+    </div>
     <div id="step-3" class="step-panel hidden"><!-- filled in Task 8 --></div>
     <div id="step-4" class="step-panel hidden"><!-- filled in Task 9 --></div>
 

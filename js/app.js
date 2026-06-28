@@ -135,9 +135,113 @@ function initStep1() {
   });
 }
 
-// Stubs for later tasks (prevents import errors)
-function renderStep2() {}
-function renderStep2Items() {}
+// ── Step 2 ──────────────────────────────────────────────────────────
+function renderStep2() {
+  // Month pills
+  const pillsEl = document.getElementById('month-pills');
+  pillsEl.innerHTML = '';
+  MONTH_CODES.forEach(code => {
+    const monthData = state.excelData?.monthlyData?.[code];
+    const hasData = monthData && Object.values(monthData).some(v => v.plan > 0 || v.real > 0);
+    const btn = document.createElement('button');
+    btn.className = 'month-pill px-4 py-2 rounded-full text-sm font-medium border-2 transition '
+                  + (hasData ? 'border-gray-200 text-gray-600 hover:border-indigo-400 cursor-pointer'
+                              : 'border-gray-100 text-gray-300 cursor-not-allowed');
+    btn.textContent = t(`month_${code}`);
+    btn.dataset.code = code;
+    btn.disabled = !hasData;
+    if (hasData) btn.addEventListener('click', () => selectMonth(code));
+    pillsEl.appendChild(btn);
+  });
+
+  // Mode buttons
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.classList.toggle('border-indigo-500', btn.dataset.val === state.selectedMode);
+    btn.classList.toggle('bg-indigo-50', btn.dataset.val === state.selectedMode);
+    btn.classList.toggle('text-indigo-700', btn.dataset.val === state.selectedMode);
+    btn.classList.toggle('border-gray-200', btn.dataset.val !== state.selectedMode);
+    btn.classList.toggle('text-gray-600', btn.dataset.val !== state.selectedMode);
+    btn.addEventListener('click', () => {
+      state.selectedMode = btn.dataset.val;
+      renderStep2();
+    });
+  });
+
+  renderStep2Items();
+
+  // Navigation
+  document.getElementById('btn-s2-back').onclick = () => goToStep(1);
+  document.getElementById('btn-s2-next').onclick = () => {
+    if (!state.selectedMonth) { showError('s2-error', 'err_no_items'); return; }
+    if (state.checkedItems.size === 0) { showError('s2-error', 'err_no_items'); return; }
+    renderStep3();
+    goToStep(3);
+  };
+}
+
+function selectMonth(code) {
+  state.selectedMonth = code;
+  state.checkedItems = new Set(); // reset on month change; renderStep2Items will re-populate
+  document.querySelectorAll('.month-pill').forEach(p => {
+    const active = p.dataset.code === code;
+    p.classList.toggle('border-indigo-500', active);
+    p.classList.toggle('bg-indigo-50', active);
+    p.classList.toggle('text-indigo-700', active);
+    p.classList.toggle('border-gray-200', !active && !p.disabled);
+    p.classList.toggle('text-gray-600', !active && !p.disabled);
+  });
+  renderStep2Items();
+}
+
+function renderStep2Items() {
+  const listEl = document.getElementById('items-list');
+  const noMsg = document.getElementById('no-items-msg');
+  if (!listEl) return;
+
+  if (!state.selectedMonth) {
+    listEl.innerHTML = '';
+    noMsg.classList.remove('hidden');
+    return;
+  }
+
+  const monthData = state.excelData?.monthlyData?.[state.selectedMonth] || {};
+  const activeItems = ALL_ITEM_KEYS.filter(key => {
+    const hours = state.selectedMode === 'plan' ? monthData[key]?.plan : monthData[key]?.real;
+    return (hours || 0) > 0;
+  });
+
+  if (activeItems.length === 0) {
+    listEl.innerHTML = '';
+    noMsg.classList.remove('hidden');
+    return;
+  }
+  noMsg.classList.add('hidden');
+
+  listEl.innerHTML = '';
+  // On month change checkedItems is cleared by selectMonth; on mode toggle it is preserved.
+  // Only initialize to all-active when empty (i.e. fresh month selection).
+  if (state.checkedItems.size === 0) state.checkedItems = new Set(activeItems);
+
+  activeItems.forEach(key => {
+    const hours = state.selectedMode === 'plan' ? monthData[key]?.plan : monthData[key]?.real;
+    const checked = state.checkedItems.has(key);
+    const row = document.createElement('label');
+    row.className = 'flex items-center gap-3 py-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 px-2 rounded';
+    row.innerHTML = `
+      <input type="checkbox" class="item-check w-4 h-4 accent-indigo-600" data-key="${key}" ${checked ? 'checked' : ''}>
+      <span class="flex-1 text-sm text-gray-700">${t('item_' + key)}</span>
+      <span class="text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-1 rounded-full">${hours} ${t('hours_suffix')}</span>
+    `;
+    row.querySelector('input').addEventListener('change', e => {
+      if (e.target.checked) state.checkedItems.add(key);
+      else state.checkedItems.delete(key);
+    });
+    listEl.appendChild(row);
+  });
+}
+
+function renderStep3() {}
+
 function renderStep3Prompts() {}
 
 // ── Boot ────────────────────────────────────────────────────────────
