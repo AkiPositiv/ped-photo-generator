@@ -161,10 +161,10 @@ function renderStep2() {
     btn.classList.toggle('text-indigo-700', btn.dataset.val === state.selectedMode);
     btn.classList.toggle('border-gray-200', btn.dataset.val !== state.selectedMode);
     btn.classList.toggle('text-gray-600', btn.dataset.val !== state.selectedMode);
-    btn.addEventListener('click', () => {
+    btn.onclick = () => {
       state.selectedMode = btn.dataset.val;
       renderStep2();
-    });
+    };
   });
 
   renderStep2Items();
