@@ -448,9 +448,134 @@ async function downloadAllZip() {
   saveAs(zipBlob, 'ped_photos.zip');
 }
 
+// ── Composer ────────────────────────────────────────────────────────
+function initComposer() {
+  const faceDropEl    = document.getElementById('comp-face-drop');
+  const faceInputEl   = document.getElementById('comp-face-input');
+  const facePreview   = document.getElementById('comp-face-preview');
+  const faceImgEl     = document.getElementById('comp-face-img');
+  const sampleDropEl  = document.getElementById('comp-sample-drop');
+  const sampleInputEl = document.getElementById('comp-sample-input');
+  const samplePreview = document.getElementById('comp-sample-preview');
+  const sampleImgEl   = document.getElementById('comp-sample-img');
+  const errEl         = document.getElementById('comp-error');
+  const spinner       = document.getElementById('comp-spinner');
+  const resultDiv     = document.getElementById('comp-result');
+  const resultImgEl   = document.getElementById('comp-result-img');
+  const downloadBtn   = document.getElementById('comp-download-btn');
+
+  let compFaceFile   = null;
+  let compSampleFile = null;
+  let compMode       = 'desc';
+
+  function showCompError(msg) {
+    errEl.textContent = msg;
+    errEl.classList.remove('hidden');
+  }
+
+  // ── Face photo upload ──
+  faceDropEl.onclick     = () => faceInputEl.click();
+  faceDropEl.ondragover  = e => { e.preventDefault(); faceDropEl.classList.add('drag-over'); };
+  faceDropEl.ondragleave = () => faceDropEl.classList.remove('drag-over');
+  faceDropEl.ondrop = e => {
+    e.preventDefault(); faceDropEl.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f?.type.startsWith('image/')) setFaceFile(f);
+  };
+  faceInputEl.onchange = () => { if (faceInputEl.files[0]) setFaceFile(faceInputEl.files[0]); faceInputEl.value = ''; };
+
+  function setFaceFile(file) {
+    compFaceFile = file;
+    faceImgEl.src = URL.createObjectURL(file);
+    facePreview.classList.remove('hidden');
+  }
+
+  // ── Sample photo upload ──
+  sampleDropEl.onclick     = () => sampleInputEl.click();
+  sampleDropEl.ondragover  = e => { e.preventDefault(); sampleDropEl.classList.add('drag-over'); };
+  sampleDropEl.ondragleave = () => sampleDropEl.classList.remove('drag-over');
+  sampleDropEl.ondrop = e => {
+    e.preventDefault(); sampleDropEl.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f?.type.startsWith('image/')) setSampleFile(f);
+  };
+  sampleInputEl.onchange = () => { if (sampleInputEl.files[0]) setSampleFile(sampleInputEl.files[0]); sampleInputEl.value = ''; };
+
+  function setSampleFile(file) {
+    compSampleFile = file;
+    sampleImgEl.src = URL.createObjectURL(file);
+    samplePreview.classList.remove('hidden');
+  }
+
+  // ── Mode toggle ──
+  document.getElementById('comp-mode-desc').onclick = () => setCompMode('desc');
+  document.getElementById('comp-mode-photo').onclick = () => setCompMode('photo');
+
+  function setCompMode(mode) {
+    compMode = mode;
+    const descBtn  = document.getElementById('comp-mode-desc');
+    const photoBtn = document.getElementById('comp-mode-photo');
+    const descPanel  = document.getElementById('comp-desc-panel');
+    const photoPanel = document.getElementById('comp-photo-panel');
+    const isDesc = mode === 'desc';
+    descBtn.classList.toggle('border-indigo-500', isDesc);
+    descBtn.classList.toggle('bg-indigo-50', isDesc);
+    descBtn.classList.toggle('text-indigo-700', isDesc);
+    descBtn.classList.toggle('border-gray-200', !isDesc);
+    descBtn.classList.toggle('text-gray-500', !isDesc);
+    photoBtn.classList.toggle('border-indigo-500', !isDesc);
+    photoBtn.classList.toggle('bg-indigo-50', !isDesc);
+    photoBtn.classList.toggle('text-indigo-700', !isDesc);
+    photoBtn.classList.toggle('border-gray-200', isDesc);
+    photoBtn.classList.toggle('text-gray-500', isDesc);
+    descPanel.classList.toggle('hidden', !isDesc);
+    photoPanel.classList.toggle('hidden', isDesc);
+  }
+
+  // ── Generate ──
+  document.getElementById('comp-generate-btn').onclick = async () => {
+    errEl.classList.add('hidden');
+
+    if (!state.apiKey) { showCompError('Введите Fal.ai API ключ в блоке настроек выше'); return; }
+    if (!compFaceFile) { showCompError('Загрузите фото учителя'); return; }
+    const desc = document.getElementById('comp-prompt').value.trim();
+    if (compMode === 'desc' && !desc) { showCompError('Введите описание сцены'); return; }
+    if (compMode === 'photo' && !compSampleFile) { showCompError('Загрузите образец фотографии'); return; }
+
+    resultDiv.classList.remove('hidden');
+    spinner.classList.remove('hidden');
+    resultImgEl.classList.add('hidden');
+    downloadBtn.classList.add('hidden');
+
+    try {
+      let url;
+      if (compMode === 'desc') {
+        url = await composerGenerateWithDesc(state.apiKey, compFaceFile, desc);
+      } else {
+        const faceUrl   = await uploadSingleImage(compFaceFile, state.apiKey);
+        const targetUrl = await uploadSingleImage(compSampleFile, state.apiKey);
+        url = await composerFaceSwap(state.apiKey, faceUrl, targetUrl);
+      }
+      spinner.classList.add('hidden');
+      resultImgEl.src = url;
+      resultImgEl.classList.remove('hidden');
+      downloadBtn.classList.remove('hidden');
+      downloadBtn.onclick = async () => {
+        const resp = await fetch(url);
+        const blob = await resp.blob();
+        saveAs(blob, 'teacher_in_scene.jpg');
+      };
+    } catch (err) {
+      spinner.classList.add('hidden');
+      showCompError('Ошибка: ' + err.message);
+    }
+  };
+}
+
 // ── Boot ────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   applyTranslations();
   initLang();
   initStep1();
+  initComposer();
 });
