@@ -7,6 +7,8 @@
 <h2>Unit Tests</h2>
 <div id="out"></div>
 <script type="module">
+import { t, TRANSLATIONS } from '../js/i18n.js';
+
 const out = document.getElementById('out');
 let pass = 0, fail = 0;
 function assert(label, cond) {
@@ -15,7 +17,17 @@ function assert(label, cond) {
   else       { el.className='fail'; el.textContent=`❌ ${label}`; fail++; }
   out.appendChild(el);
 }
-// Tests will be added in Tasks 2–4
+
+// Set lang to ru
+localStorage.setItem('lang', 'ru');
+assert('t(title) returns Russian string', t('title') === 'Генератор фото по пед нагрузке');
+assert('t(btn_generate, {n:3}) interpolates', t('btn_generate', { n: 3 }) === 'Генерировать 3 фотографий');
+assert('t(unknown_key) returns key itself', t('__no_such_key__') === '__no_such_key__');
+
+localStorage.setItem('lang', 'uz');
+assert('t(title) returns Uzbek string', t('title') === 'Ped yuklama asosida foto generator');
+
+localStorage.setItem('lang', 'ru'); // reset
 const summary = document.createElement('div');
 summary.style = 'margin-top:16px;font-weight:bold';
 summary.textContent = `${pass} passed, ${fail} failed`;
