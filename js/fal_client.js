@@ -46,5 +46,8 @@ export async function generatePhoto(apiKey, imageArchiveUrl, prompt) {
       guidance_scale: 5,
     },
   });
+  if (!result.images || result.images.length === 0) {
+    throw new Error('No images returned from Fal.ai');
+  }
   return result.images[0].url;
 }
