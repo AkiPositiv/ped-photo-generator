@@ -10,6 +10,7 @@
 <script type="module">
 import { t, TRANSLATIONS } from '../js/i18n.js';
 import { parseWorkbook } from '../js/excel_parser.js';
+import { ANGLE_POOL, SCENE_TEMPLATES, assignAngles, buildPrompt } from '../js/prompt_builder.js';
 
 const out = document.getElementById('out');
 let pass = 0, fail = 0;
@@ -59,6 +60,22 @@ assert('academicYear parsed', parsed.academicYear === '2025-2026');
 assert('September teaching plan = 40', parsed.monthlyData?.S?.teaching?.plan === 40);
 assert('September teaching real = 32', parsed.monthlyData?.S?.teaching?.real === 32);
 assert('unknown month not in monthlyData', !parsed.monthlyData?.['Z']);
+
+// prompt_builder tests
+assert('ANGLE_POOL has 10 items', ANGLE_POOL.length === 10);
+assert('SCENE_TEMPLATES has teaching', !!SCENE_TEMPLATES['teaching']);
+assert('SCENE_TEMPLATES has all 17 keys', Object.keys(SCENE_TEMPLATES).length === 17);
+
+const keys = ['teaching', 'consultations', 'open_lessons'];
+const angles = assignAngles(keys);
+assert('assignAngles returns entry for each key', keys.every(k => typeof angles[k] === 'string'));
+assert('assignAngles angles come from ANGLE_POOL', keys.every(k => ANGLE_POOL.includes(angles[k])));
+
+const p = buildPrompt('female', 'teaching', 'front-facing view, eye level');
+assert('buildPrompt contains img token', p.startsWith('img,'));
+assert('buildPrompt contains female teacher', p.includes('female teacher'));
+assert('buildPrompt contains angle', p.includes('front-facing view, eye level'));
+assert('buildPrompt contains vocational college', p.includes('vocational college'));
 
 const summary = document.createElement('div');
 summary.style = 'margin-top:16px;font-weight:bold';
