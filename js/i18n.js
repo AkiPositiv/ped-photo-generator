@@ -1,4 +1,4 @@
-export const TRANSLATIONS = {
+const TRANSLATIONS = {
   ru: {
     title: "Генератор фото по пед нагрузке",
     lang_switch: "UZ",
@@ -123,7 +123,7 @@ export const TRANSLATIONS = {
   },
 };
 
-export function t(key, vars = {}) {
+function t(key, vars = {}) {
   const lang = localStorage.getItem('lang') || 'ru';
   let str = TRANSLATIONS[lang]?.[key] ?? TRANSLATIONS.ru[key] ?? key;
   for (const [k, v] of Object.entries(vars)) {

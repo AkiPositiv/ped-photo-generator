@@ -30,7 +30,7 @@ function sumCols(ws, row, colStart, colEnd) {
  * Parse an already-loaded XLSX workbook object.
  * Returns { teacherName, academicYear, monthlyData }
  */
-export function parseWorkbook(wb) {
+function parseWorkbook(wb) {
   const firstWs = wb.Sheets[wb.SheetNames[0]];
 
   // Teacher name: cell B6 in first sheet
@@ -77,7 +77,7 @@ export function parseWorkbook(wb) {
  * @param {File} file
  * @returns {Promise<{teacherName: string, academicYear: string, monthlyData: Object}>}
  */
-export function parseExcel(file) {
+function parseExcel(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {

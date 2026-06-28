@@ -1,4 +1,4 @@
-export const ANGLE_POOL = [
+const ANGLE_POOL = [
   "front-facing view, eye level, medium shot",
   "three-quarter angle, camera slightly elevated",
   "side profile, candid documentary style",
@@ -11,7 +11,7 @@ export const ANGLE_POOL = [
   "dutch angle, creative tilt composition",
 ];
 
-export const SCENE_TEMPLATES = {
+const SCENE_TEMPLATES = {
   teaching:           "conducting a theoretical lecture to students in a vocational college classroom, explaining at the whiteboard",
   consultations:      "providing individual academic consultation to a student at a desk, reviewing materials together",
   graduation_thesis:  "mentoring a student on their graduation thesis, reviewing documents at a table",
@@ -34,7 +34,7 @@ export const SCENE_TEMPLATES = {
 /**
  * Fisher-Yates shuffle of ANGLE_POOL, assign one angle per key (wraps if more keys than angles).
  */
-export function assignAngles(itemKeys) {
+function assignAngles(itemKeys) {
   const pool = [...ANGLE_POOL];
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -49,7 +49,7 @@ export function assignAngles(itemKeys) {
  * Assemble the full English prompt for PhotoMaker.
  * "img" is the PhotoMaker trigger token for face reference.
  */
-export function buildPrompt(gender, itemKey, angle) {
+function buildPrompt(gender, itemKey, angle) {
   const genderWord = gender === 'male' ? 'male teacher' : 'female teacher';
   const scene = SCENE_TEMPLATES[itemKey] || 'working professionally in a vocational college';
   return `img, ${genderWord}, ${scene}, ${angle}, vocational college setting, `

@@ -19,7 +19,7 @@ async function zipFiles(files) {
  * Upload face reference photos to Fal.ai storage as a ZIP.
  * Returns the public URL of the uploaded ZIP.
  */
-export async function uploadFacePhotos(files, apiKey) {
+async function uploadFacePhotos(files, apiKey) {
   const fal = await getFal();
   fal.config({ credentials: apiKey });
   const blob = await zipFiles(files);
@@ -31,7 +31,7 @@ export async function uploadFacePhotos(files, apiKey) {
  * Generate one photo via fal-ai/photomaker.
  * Returns the URL of the generated image.
  */
-export async function generatePhoto(apiKey, imageArchiveUrl, prompt) {
+async function generatePhoto(apiKey, imageArchiveUrl, prompt) {
   const fal = await getFal();
   fal.config({ credentials: apiKey });
   const result = await fal.run('fal-ai/photomaker', {

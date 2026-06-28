@@ -1,10 +1,5 @@
-import { t, TRANSLATIONS } from './i18n.js';
-import { parseExcel } from './excel_parser.js';
-import { assignAngles, buildPrompt, ANGLE_POOL } from './prompt_builder.js';
-import { uploadFacePhotos, generatePhoto } from './fal_client.js';
-
 // ── State ───────────────────────────────────────────────────────────
-export const state = {
+const state = {
   step: 1,
   lang: localStorage.getItem('lang') || 'ru',
   apiKey: localStorage.getItem('fal_api_key') || '',
@@ -40,7 +35,7 @@ function applyTranslations() {
 }
 
 // ── Step navigation ─────────────────────────────────────────────────
-export function goToStep(n) {
+function goToStep(n) {
   document.querySelectorAll('.step-panel').forEach((p, i) => {
     p.classList.toggle('hidden', i + 1 !== n);
   });
