@@ -51,20 +51,31 @@ async function uploadSingleImage(file, apiKey) {
 async function generatePhoto(apiKey, imageArchiveUrl, prompt) {
   const fal = await getFal();
   fal.config({ credentials: apiKey });
-  const result = await fal.subscribe('fal-ai/photomaker', {
-    input: {
-      image_archive_url: imageArchiveUrl,
-      prompt,
-      negative_prompt: 'cartoon, anime, illustration, blurry, low quality, deformed, extra limbs, watermark',
-      style_name: 'Photographic (Default)',
-      num_steps: 30,
-      style_strength_ratio: 20,
-      num_images: 1,
-      guidance_scale: 5,
-    },
-  });
+  console.log('[fal] calling fal-ai/photomaker, archive:', imageArchiveUrl, 'prompt:', prompt);
+  let result;
+  try {
+    result = await fal.subscribe('fal-ai/photomaker', {
+      input: {
+        image_archive_url: imageArchiveUrl,
+        prompt,
+        negative_prompt: 'cartoon, anime, illustration, blurry, low quality, deformed, extra limbs, watermark',
+        style_name: 'Photographic (Default)',
+        num_steps: 30,
+        style_strength_ratio: 20,
+        num_images: 1,
+        guidance_scale: 5,
+      },
+      logs: true,
+      onQueueUpdate: (update) => console.log('[fal] queue update:', JSON.stringify(update)),
+    });
+  } catch (e) {
+    console.error('[fal] subscribe threw:', e);
+    throw e;
+  }
+  console.log('[fal] raw result:', JSON.stringify(result));
   const images = extractImages(result);
-  if (images.length === 0) throw new Error('Fal.ai не вернул изображение');
+  console.log('[fal] extracted images:', images);
+  if (images.length === 0) throw new Error('Fal.ai не вернул изображение. Смотри консоль (F12) для деталей.');
   return images[0].url;
 }
 
