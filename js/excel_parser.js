@@ -16,7 +16,7 @@ function cellNum(ws, row, col) {
   const addr = XLSX.utils.encode_cell({ r: row - 1, c: col - 1 });
   const cell = ws[addr];
   if (!cell) return 0;
-  return typeof cell.v === 'number' ? Math.round(cell.v) : 0;
+  return typeof cell.v === 'number' ? Math.round(cell.v) : (Number(cell.v) || 0);
 }
 
 /** Sum cols colStart..colEnd (1-based) for a given 1-based row. */
@@ -36,14 +36,21 @@ export function parseWorkbook(wb) {
   // Teacher name: cell B6 in first sheet
   const teacherName = firstWs?.['B6']?.v?.toString().trim() || '';
 
-  // Academic year: scan first 10 rows, 7 cols for "20XX-20XX"
+  // Academic year: try G5 first (most reliable location in generated files),
+  // then fall back to scanning first 10 rows, 7 cols for "20XX-20XX"
   let academicYear = '';
-  outer: for (let r = 0; r < 10; r++) {
-    for (let c = 0; c < 7; c++) {
-      const addr = XLSX.utils.encode_cell({ r, c });
-      const val = firstWs?.[addr]?.v?.toString() || '';
-      const m = val.match(/\b(20\d\d-20\d\d)\b/);
-      if (m) { academicYear = m[1]; break outer; }
+  const g5 = firstWs?.['G5']?.v?.toString() || '';
+  const g5match = g5.match(/\b(20\d\d-20\d\d)\b/);
+  if (g5match) {
+    academicYear = g5match[1];
+  } else {
+    outer: for (let r = 0; r < 10; r++) {
+      for (let c = 0; c < 7; c++) {
+        const addr = XLSX.utils.encode_cell({ r, c });
+        const val = firstWs?.[addr]?.v?.toString() || '';
+        const m = val.match(/\b(20\d\d-20\d\d)\b/);
+        if (m) { academicYear = m[1]; break outer; }
+      }
     }
   }
 
