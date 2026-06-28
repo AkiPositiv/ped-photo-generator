@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Tests</title>
+<style>body{font-family:monospace;padding:20px;} .pass{color:green} .fail{color:red;font-weight:bold}</style>
+</head>
+<body>
+<h2>Unit Tests</h2>
+<div id="out"></div>
+<script type="module">
+const out = document.getElementById('out');
+let pass = 0, fail = 0;
+function assert(label, cond) {
+  const el = document.createElement('div');
+  if (cond) { el.className='pass'; el.textContent=`✅ ${label}`; pass++; }
+  else       { el.className='fail'; el.textContent=`❌ ${label}`; fail++; }
+  out.appendChild(el);
+}
+// Tests will be added in Tasks 2–4
+const summary = document.createElement('div');
+summary.style = 'margin-top:16px;font-weight:bold';
+summary.textContent = `${pass} passed, ${fail} failed`;
+out.appendChild(summary);
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Генератор фото по пед нагрузке</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-indigo-700 text-white px-6 py-4 flex items-center justify-between shadow-lg">
+    <h1 class="text-xl font-bold" data-i18n="title">Генератор фото по пед нагрузке</h1>
+    <button id="btn-lang" class="bg-indigo-500 hover:bg-indigo-400 px-3 py-1 rounded text-sm font-medium transition">UZ</button>
+  </header>
+
+  <div class="max-w-4xl mx-auto px-4 mt-8 pb-16">
+
+    <!-- Progress bar -->
+    <div class="flex items-center mb-10" id="progress-bar">
+      <div class="step-item active" data-step="1">
+        <div class="step-circle">1</div>
+        <div class="step-label" data-i18n="step1_title">Настройка</div>
+      </div>
+      <div class="step-line flex-1"></div>
+      <div class="step-item" data-step="2">
+        <div class="step-circle">2</div>
+        <div class="step-label" data-i18n="step2_title">Месяц и режим</div>
+      </div>
+      <div class="step-line flex-1"></div>
+      <div class="step-item" data-step="3">
+        <div class="step-circle">3</div>
+        <div class="step-label" data-i18n="step3_title">Фото и промпты</div>
+      </div>
+      <div class="step-line flex-1"></div>
+      <div class="step-item" data-step="4">
+        <div class="step-circle">4</div>
+        <div class="step-label" data-i18n="step4_title">Генерация</div>
+      </div>
+    </div>
+
+    <!-- Step panels -->
+    <div id="step-1" class="step-panel"><!-- filled in Task 6 --></div>
+    <div id="step-2" class="step-panel hidden"><!-- filled in Task 7 --></div>
+    <div id="step-3" class="step-panel hidden"><!-- filled in Task 8 --></div>
+    <div id="step-4" class="step-panel hidden"><!-- filled in Task 9 --></div>
+
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
