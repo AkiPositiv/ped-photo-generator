@@ -2,12 +2,14 @@
 <html>
 <head><meta charset="UTF-8"><title>Tests</title>
 <style>body{font-family:monospace;padding:20px;} .pass{color:green} .fail{color:red;font-weight:bold}</style>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 <h2>Unit Tests</h2>
 <div id="out"></div>
 <script type="module">
 import { t, TRANSLATIONS } from '../js/i18n.js';
+import { parseWorkbook } from '../js/excel_parser.js';
 
 const out = document.getElementById('out');
 let pass = 0, fail = 0;
@@ -28,6 +30,36 @@ localStorage.setItem('lang', 'uz');
 assert('t(title) returns Uzbek string', t('title') === 'Ped yuklama asosida foto generator');
 
 localStorage.setItem('lang', 'ru'); // reset
+
+// excel_parser tests — uses XLSX global from CDN
+// Build synthetic workbook
+function makeTestWb() {
+  const wb = XLSX.utils.book_new();
+
+  // Yillik sheet: B6 = teacher name, G5 = academic year
+  const yData = Array.from({ length: 10 }, () => Array(8).fill(''));
+  yData[5][1] = 'Akbarov Xojiakbar'; // row 6, col B (0-indexed: row 5, col 1)
+  yData[4][6] = '2025-2026';          // row 5, col G (0-indexed: row 4, col 6)
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(yData), 'Yillik');
+
+  // S sheet (September): teaching row = 8 (0-indexed: 7)
+  // Plan cols C-F (1-based 3-6, 0-based 2-5): 10,10,10,10 → sum 40
+  // Real cols H-K (1-based 8-11, 0-based 7-10): 8,8,8,8 → sum 32
+  const sData = Array.from({ length: 32 }, () => Array(12).fill(0));
+  sData[7][2] = 10; sData[7][3] = 10; sData[7][4] = 10; sData[7][5] = 10;
+  sData[7][7] = 8;  sData[7][8] = 8;  sData[7][9] = 8;  sData[7][10] = 8;
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sData), 'S');
+
+  return wb;
+}
+
+const parsed = parseWorkbook(makeTestWb());
+assert('teacherName parsed from B6', parsed.teacherName === 'Akbarov Xojiakbar');
+assert('academicYear parsed', parsed.academicYear === '2025-2026');
+assert('September teaching plan = 40', parsed.monthlyData?.S?.teaching?.plan === 40);
+assert('September teaching real = 32', parsed.monthlyData?.S?.teaching?.real === 32);
+assert('unknown month not in monthlyData', !parsed.monthlyData?.['Z']);
+
 const summary = document.createElement('div');
 summary.style = 'margin-top:16px;font-weight:bold';
 summary.textContent = `${pass} passed, ${fail} failed`;
