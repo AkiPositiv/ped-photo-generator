@@ -107,6 +107,7 @@ function initStep1() {
       state.excelData = await parseExcel(file);
       status.textContent = `✅ ${t('teacher_loaded')} ${state.excelData.teacherName} (${state.excelData.academicYear})`;
     } catch (err) {
+      state.excelData = null;
       status.textContent = `❌ ${err.message}`;
     }
   }
