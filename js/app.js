@@ -340,7 +340,118 @@ function renderStep3Prompts() {
   });
 }
 
-function renderStep4() {}
+function renderStep4() {
+  document.getElementById('btn-s4-back').onclick = () => goToStep(3);
+  document.getElementById('btn-download-all').onclick = downloadAllZip;
+
+  // Auto-start generation when step 4 is rendered
+  startGeneration();
+}
+
+async function startGeneration() {
+  const galleryEl = document.getElementById('gallery-grid');
+  const statusEl = document.getElementById('s4-status');
+  const uploadProgress = document.getElementById('upload-progress');
+  const downloadAllBtn = document.getElementById('btn-download-all');
+
+  const keys = [...state.checkedItems];
+  state.results = {};
+
+  // Build placeholder cards
+  galleryEl.innerHTML = '';
+  keys.forEach(key => {
+    const card = document.createElement('div');
+    card.className = 'gallery-card';
+    card.id = `gallery-card-${key}`;
+    card.innerHTML = `
+      <div class="flex items-center justify-center aspect-square bg-gray-100">
+        <div class="spinner"></div>
+      </div>
+      <div class="gallery-card-body">
+        <p class="text-xs font-medium text-gray-700 truncate">${t('item_' + key)}</p>
+        <p class="text-xs text-gray-400 mt-1" id="card-status-${key}" data-i18n="generating">Генерация...</p>
+      </div>
+    `;
+    galleryEl.appendChild(card);
+  });
+
+  try {
+    // 1. Upload face photos (once)
+    uploadProgress.classList.remove('hidden');
+    state.faceZipUrl = await uploadFacePhotos(state.photoFiles, state.apiKey);
+    uploadProgress.classList.add('hidden');
+
+    // 2. Fire all generation requests in parallel
+    statusEl.textContent = t('generating');
+    const promises = keys.map(key =>
+      generatePhoto(state.apiKey, state.faceZipUrl, state.prompts[key])
+        .then(url => {
+          state.results[key] = { url };
+          updateGalleryCard(key, url);
+        })
+        .catch(err => {
+          state.results[key] = { error: err.message };
+          updateGalleryCardError(key, err.message);
+        })
+    );
+    await Promise.all(promises);
+
+    statusEl.textContent = t('done');
+    downloadAllBtn.classList.remove('hidden');
+
+  } catch (err) {
+    uploadProgress.classList.add('hidden');
+    statusEl.textContent = t('err_upload', { msg: err.message });
+  }
+}
+
+function updateGalleryCard(key, url) {
+  const card = document.getElementById(`gallery-card-${key}`);
+  if (!card) return;
+  card.innerHTML = `
+    <img src="${url}" alt="${t('item_' + key)}" loading="lazy">
+    <div class="gallery-card-body">
+      <p class="text-xs font-medium text-gray-700 truncate">${t('item_' + key)}</p>
+      <button class="mt-2 w-full text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 py-1 rounded-lg hover:bg-indigo-100 transition"
+        onclick="downloadSingle('${key}', '${url}')" data-i18n="btn_download">⬇ Скачать</button>
+    </div>
+  `;
+}
+
+function updateGalleryCardError(key, msg) {
+  const card = document.getElementById(`gallery-card-${key}`);
+  if (!card) return;
+  card.querySelector(`#card-status-${key}`)?.remove();
+  card.innerHTML = `
+    <div class="flex items-center justify-center aspect-square bg-red-50">
+      <span class="text-2xl">❌</span>
+    </div>
+    <div class="gallery-card-body">
+      <p class="text-xs font-medium text-gray-700 truncate">${t('item_' + key)}</p>
+      <p class="text-xs text-red-500 mt-1">${msg}</p>
+    </div>
+  `;
+}
+
+window.downloadSingle = async function(key, url) {
+  const resp = await fetch(url);
+  const blob = await resp.blob();
+  saveAs(blob, `${key}.jpg`);
+};
+
+async function downloadAllZip() {
+  const zip = new JSZip();
+  const fetchPromises = Object.entries(state.results)
+    .filter(([, r]) => r.url)
+    .map(async ([key, { url }]) => {
+      const resp = await fetch(url);
+      const blob = await resp.blob();
+      zip.file(`${key}.jpg`, blob);
+    });
+  await Promise.all(fetchPromises);
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  saveAs(zipBlob, 'ped_photos.zip');
+}
 
 // ── Boot ────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {

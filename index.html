@@ -128,7 +128,27 @@
         <button id="btn-s3-next" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-xl transition" data-i18n="btn_next">Далее →</button>
       </div>
     </div>
-    <div id="step-4" class="step-panel hidden"><!-- filled in Task 9 --></div>
+    <div id="step-4" class="step-panel hidden">
+      <div class="card mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-700">
+            <span id="s4-status" data-i18n="generating">Генерация...</span>
+          </h2>
+          <button id="btn-download-all" class="hidden bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-xl text-sm transition" data-i18n="btn_download_all">📦 Скачать все (ZIP)</button>
+        </div>
+        <div id="upload-progress" class="mb-4 hidden">
+          <div class="flex items-center gap-3 text-sm text-gray-600">
+            <div class="spinner"></div>
+            <span data-i18n="uploading_photos">Загрузка фото на сервер...</span>
+          </div>
+        </div>
+        <div id="gallery-grid" class="gallery-grid"></div>
+      </div>
+
+      <div class="flex justify-start mt-4">
+        <button id="btn-s4-back" class="border border-gray-300 text-gray-600 font-medium px-8 py-3 rounded-xl hover:bg-gray-50 transition" data-i18n="btn_back">← Назад</button>
+      </div>
+    </div>
 
   </div>
 
